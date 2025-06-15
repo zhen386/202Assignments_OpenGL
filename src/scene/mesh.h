@@ -15,13 +15,13 @@ using namespace std;
 #define MAX_BONE_INFLUENCE 4
 
 struct Vertex {
-    // position
+    // 坐标
     glm::vec3 Position;
-    // normal
+    // 法线
     glm::vec3 Normal;
-    // texCoords
+    // 纹理坐标
     glm::vec2 TexCoords;
-    // tangent
+    // 角度tan
     glm::vec3 Tangent;
     // bitangent
     glm::vec3 Bitangent;
@@ -64,8 +64,9 @@ public:
         unsigned int specularNr = 1;
         unsigned int normalNr   = 1;
         unsigned int heightNr   = 1;
-        for(unsigned int i = 0; i < textures.size(); i++)
+        for(unsigned int i = 1; i < textures.size() + 1; i++)
         {
+
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             // retrieve texture number (the N in diffuse_textureN)
             string number;

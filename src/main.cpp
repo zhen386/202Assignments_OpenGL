@@ -9,10 +9,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+
 #include <shader_m.h>
 #include <camera.h>
-#include <model.h>
-#include <lightCube.h>
+#include <../src/scene/model.h>
+#include <../src/scene/lightCube.h>
+#include <../src/scene/floor.h>
 
 #include <iostream>
 
@@ -77,43 +82,97 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader ourShader("../src/shaders/assignment0.vert", "../src/shaders/assignment0.frag");
+    Shader sceneShader("../src/shaders/assignment0.vert", "../src/shaders/assignment0.frag");
     Shader lightCubeShader("../src/shaders/lightCube.vert", "../src/shaders/lightCube.frag");
-    Model ourModel("../assets/mary/Marry.obj");
+    // Shader floorShader("../src/shaders/floor.vert", "../src/shaders/floor.frag");
+    Model marry("../assets/mary/Marry.obj");
+    Model floor("../assets/floor/floor.obj");
 
     LightCube lightCube;
     lightCube.set();
 
+    // Floor floor;
+    // floor.set();
+
+    // ImGui::CreateContext();
+    // ImGui_ImplGlfw_InitForOpenGL(window, true);
+    // ImGui_ImplOpenGL3_Init("#version 330 core"); // 匹配你的 OpenGL 版本
+    // ImGui::StyleColorsDark(); // 设置界面风格
+
+    // // 模型变换参数
+    // glm::vec3 modelTranslation(0.0f, 0.0f, 0.0f);
+    // glm::vec3 modelScale(1.0f, 1.0f, 1.0f);
+    // glm::vec3 modelRotation(0.0f, 0.0f, 0.0f);
+
     while (!glfwWindowShouldClose(window))
     {
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
         processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ourShader.use();
+        sceneShader.use();
+
+        float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         float lightAngle = currentFrame * lightSpeed;  // 基于时间的角度
         lightPos.x = cos(lightAngle) * lightRadius;    // X坐标随cos变化
         lightPos.z = sin(lightAngle) * lightRadius;    // Z坐标随sin变化
-        ourShader.setVec3("lightPos", lightPos);
+        lightPos.y = sin(lightAngle * 0.3f) * 0.5f * -lightRadius + 1.1f;
+        sceneShader.setVec3("lightPos", lightPos);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
+        sceneShader.setMat4("projection", projection);
+        sceneShader.setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
+
+        // glm::mat4 model = glm::mat4(1.0f);
+        // // 先旋转（注意：glm 默认是弧度，若面板给的是角度，需转换）
+        // glm::vec3 rotationRadians = glm::radians(modelRotation);
+        // model = glm::rotate(model, rotationRadians.x, glm::vec3(1, 0, 0));
+        // model = glm::rotate(model, rotationRadians.y, glm::vec3(0, 1, 0));
+        // model = glm::rotate(model, rotationRadians.z, glm::vec3(0, 0, 1));
+        // // 再平移、缩放
+        // model = glm::translate(model, modelTranslation);
+        // model = glm::scale(model, modelScale);
+
+        sceneShader.setMat4("model", model);
+        sceneShader.setVec3("viewPos", camera.Position);
+
+
+        marry.Draw(sceneShader);
+        floor.Draw(sceneShader);
 
         lightCube.render(lightCubeShader, projection, view, lightPos);
+        // floor.render(floorShader, projection, view, model);
+
+        // // 开始新的 ImGUI 帧
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
+        //
+        // // ********** 在这里创建你的参数面板 **********
+        // ImGui::Begin("Model properties");
+        // {
+        //     ImGui::Text("Translation");
+        //     ImGui::DragFloat3("##Trans", &modelTranslation[0], 0.1f, -10.0f, 10.0f); // 拖动调整平移，范围 -10~10，步长 0.1
+        //
+        //     ImGui::Text("Scale");
+        //     ImGui::DragFloat3("##Scale", &modelScale[0], 0.1f, 0.1f, 10.0f); // 缩放，范围 0.1~10
+        //
+        //     ImGui::Text("Rotation");
+        //     ImGui::DragFloat3("##Rot", &modelRotation[0], 1.0f, 0.0f, 360.0f); // 旋转（角度），范围 0~360，步长 1
+        // }
+        // ImGui::End();
+        // // 渲染 ImGUI 内容
+        // ImGui::Render();
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
