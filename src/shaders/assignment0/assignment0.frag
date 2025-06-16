@@ -49,7 +49,5 @@ void main()
         vec3 specular = vec3(0.2f, 0.2f, 0.2f) * spec;
         FragColor = vec4(diffuse + ambient + specular, 1.f);
     }
-
-
     // FragColor = texture(texture_diffuse1, TexCoords);
 }

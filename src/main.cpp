@@ -158,16 +158,16 @@ int main()
         shadowShader.setMat4("model", model);
         sceneShader.setVec3("viewPos", camera.Position);
 
-        scene.render(sceneShader);
+        // scene.render(sceneShader);
 
 
-        // // 绘制人物模型
-        // sceneShader.setBool("useTexture", true); // 设置使用纹理标志
-        // marry.Draw(sceneShader);
-        //
-        // // 绘制地板
-        // sceneShader.setBool("useTexture", false); // 设置不使用纹理标志
-        // floor.Draw(sceneShader);
+        // 绘制人物模型
+        sceneShader.setBool("useTexture", true); // 设置使用纹理标志
+        marry.Draw(sceneShader);
+
+        // 绘制地板
+        sceneShader.setBool("useTexture", false); // 设置不使用纹理标志
+        floor.Draw(sceneShader);
 
         lightCube.render(lightCubeShader, projection, view, lightPos);
         // floor.render(floorShader, projection, view, model);

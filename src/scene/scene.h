@@ -12,7 +12,7 @@
 
 class Scene {
 public:
-    Scene();
+    Scene() {};
     void render(Shader& shader) {
 
         for (auto& model : models) {
