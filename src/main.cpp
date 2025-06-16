@@ -13,13 +13,22 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
-#include <shader_m.h>
-#include <camera.h>
+#include "shaders/shader_m.h"
+#include "camera/camera.h"
 #include <../src/scene/model.h>
 #include <../src/scene/lightCube.h>
+#include "../src/scene/scene.h"
 #include <../src/scene/floor.h>
 
 #include <iostream>
+
+const char* vertexShader = "../src/shaders/assignment0/assignment0.vert";
+const char* fragmentShader = "../src/shaders/assignment0/assignment0.frag";
+const char* lightCubeVertexShader = "../src/shaders/assignment0/lightCube.vert";
+const char* lightCubeFragmentShader = "../src/shaders/assignment0/lightCube.frag";
+const char* shadowMapVertexShader = "../src/shaders/assignment0/shadow.vert";
+const char* shadowMapFragmentShader = "../src/shaders/assignment0/shadow.frag";
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -82,17 +91,20 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader sceneShader("../src/shaders/assignment0.vert", "../src/shaders/assignment0.frag");
-    Shader lightCubeShader("../src/shaders/lightCube.vert", "../src/shaders/lightCube.frag");
+    Shader sceneShader(vertexShader, fragmentShader);
+    Shader lightCubeShader(lightCubeVertexShader, lightCubeFragmentShader);
+    Shader shadowShader(shadowMapVertexShader, shadowMapFragmentShader);
     // Shader floorShader("../src/shaders/floor.vert", "../src/shaders/floor.frag");
     Model marry("../assets/mary/Marry.obj");
-    Model floor("../assets/floor/floor.obj");
+    Model floor("../assets/floor/floor.obj", false);
+
+    Scene scene;
+
+    scene.addModel(marry);
+    scene.addModel(floor);
 
     LightCube lightCube;
     lightCube.set();
-
-    // Floor floor;
-    // floor.set();
 
     // ImGui::CreateContext();
     // ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -120,7 +132,7 @@ int main()
         float lightAngle = currentFrame * lightSpeed;  // 基于时间的角度
         lightPos.x = cos(lightAngle) * lightRadius;    // X坐标随cos变化
         lightPos.z = sin(lightAngle) * lightRadius;    // Z坐标随sin变化
-        lightPos.y = sin(lightAngle * 0.3f) * 0.5f * -lightRadius + 1.1f;
+        lightPos.y = sin(lightAngle * 0.3f) * 0.5f * -lightRadius + 1.8f;
         sceneShader.setVec3("lightPos", lightPos);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -143,11 +155,19 @@ int main()
         // model = glm::scale(model, modelScale);
 
         sceneShader.setMat4("model", model);
+        shadowShader.setMat4("model", model);
         sceneShader.setVec3("viewPos", camera.Position);
 
+        scene.render(sceneShader);
 
-        marry.Draw(sceneShader);
-        floor.Draw(sceneShader);
+
+        // // 绘制人物模型
+        // sceneShader.setBool("useTexture", true); // 设置使用纹理标志
+        // marry.Draw(sceneShader);
+        //
+        // // 绘制地板
+        // sceneShader.setBool("useTexture", false); // 设置不使用纹理标志
+        // floor.Draw(sceneShader);
 
         lightCube.render(lightCubeShader, projection, view, lightPos);
         // floor.render(floorShader, projection, view, model);

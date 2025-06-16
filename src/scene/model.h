@@ -11,7 +11,7 @@
 #include <assimp/postprocess.h>
 
 #include "mesh.h"
-#include <shader_m.h>
+#include "../shaders/shader_m.h"
 
 #include <string>
 #include <fstream>
@@ -32,10 +32,11 @@ public:
     vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     vector<Mesh>    meshes;
     string directory;
+    bool hasTexture;
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
+    Model(string const &path, bool texture = true, bool gamma = false) : hasTexture(texture), gammaCorrection(gamma)
     {
         loadModel(path);
     }
@@ -48,6 +49,7 @@ public:
     }
     
 private:
+
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const &path)
     {

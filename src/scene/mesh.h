@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <shader_m.h>
+#include "../shaders/shader_m.h"
 
 #include <string>
 #include <vector>
@@ -59,12 +59,20 @@ public:
     // render the mesh
     void Draw(Shader &shader) 
     {
+
+        // 重置纹理绑定状态
+        for (unsigned int i = 0; i < 16; ++i) { // 假设最多使用16个纹理单元
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        glActiveTexture(GL_TEXTURE0);
+
         // bind appropriate textures
         unsigned int diffuseNr  = 1;
         unsigned int specularNr = 1;
         unsigned int normalNr   = 1;
         unsigned int heightNr   = 1;
-        for(unsigned int i = 1; i < textures.size() + 1; i++)
+        for(unsigned int i = 0; i < textures.size(); i++)
         {
 
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
