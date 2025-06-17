@@ -61,7 +61,6 @@ glm::vec3 lightPos(1.2f, 1.5f, 1.5f);
 float lightSpeed = 1.f;
 float lightRadius = 1.5f;  // 光源圆周运动的半径
 
-
 int main()
 {
     glfwInit();
@@ -119,10 +118,10 @@ int main()
     scene.addModel(floor, modelMatrix);
 
     // Shadow shadow;
-    // modelMatrix = glm::mat4(1.0f);
-    // modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    // modelMatrix = glm::scale(modelMatrix, glm::vec3(1.f, 1.f, 1.0f));
-    // shadowShader.setMat4("model", modelMatrix);
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.f, 1.f, 1.0f));
+    shadowShader.setMat4("model", modelMatrix);
     LightCube lightCube;
     lightCube.set();
 
@@ -149,8 +148,8 @@ int main()
         lastFrame = currentFrame;
 
         float lightAngle = currentFrame * lightSpeed;  // 基于时间的角度
-        lightPos.x = cos(lightAngle) * lightRadius;    // X坐标随cos变化
-        lightPos.z = sin(lightAngle) * lightRadius;    // Z坐标随sin变化
+        lightPos.x = cos(lightAngle) * lightRadius * 1.2f;    // X坐标随cos变化
+        lightPos.z = sin(lightAngle) * lightRadius * 1.2f;    // Z坐标随sin变化
         lightPos.y = sin(lightAngle * 0.3f) * 0.5f * -lightRadius + 1.8f;
 
         // ShadowMapping
@@ -165,7 +164,7 @@ int main()
         GLuint depthMap;
         glGenTextures(1, &depthMap);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -198,6 +197,16 @@ int main()
         // 解绑FBO
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        // render Depth map to quad for visual debugging
+        // ---------------------------------------------
+        debugDepthQuad.use();
+        debugDepthQuad.setFloat("near_plane", 0.1f);
+        debugDepthQuad.setFloat("far_plane", 7.5f);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        renderQuad();
+
+
         // 激活并绑定阴影贴图
         sceneShader.use();
         glActiveTexture(GL_TEXTURE1);  // 使用纹理单元1（确保与其他纹理不冲突）
@@ -207,15 +216,6 @@ int main()
         // reset viewport
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // render Depth map to quad for visual debugging
-        // ---------------------------------------------
-        debugDepthQuad.use();
-        debugDepthQuad.setFloat("near_plane", 1.0f);
-        debugDepthQuad.setFloat("far_plane", 7.5f);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        renderQuad();
 
         // 渲染场景
         sceneShader.setVec3("lightPos", lightPos);
@@ -227,10 +227,7 @@ int main()
         sceneShader.setVec3("viewPos", camera.Position);
 
         scene.render(sceneShader);
-
         lightCube.render(lightCubeShader, projection, view, lightPos);
-        // floor.render(floorShader, projection, view, model);
-
 
         // shadowShader.setMat4("model", model);
 
