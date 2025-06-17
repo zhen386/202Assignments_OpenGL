@@ -60,12 +60,12 @@ public:
     void Draw(Shader &shader) 
     {
 
-        // 重置纹理绑定状态
-        for (unsigned int i = 0; i < 16; ++i) { // 假设最多使用16个纹理单元
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-        glActiveTexture(GL_TEXTURE0);
+        // // 重置纹理绑定状态
+        // for (unsigned int i = 0; i < 16; ++i) { // 假设最多使用16个纹理单元
+        //     glActiveTexture(GL_TEXTURE0 + i);
+        //     glBindTexture(GL_TEXTURE_2D, 0);
+        // }
+        // glActiveTexture(GL_TEXTURE0);
 
         // bind appropriate textures
         unsigned int diffuseNr  = 1;

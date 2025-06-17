@@ -22,12 +22,14 @@ public:
             // shader->setMat4("view", view);
 
             // 可以根据模型的类型或其他条件设置特定的 uniforms
-            if (model.hasTexture) {
+            if (model.first.hasTexture) {
                 shader.setBool("useTexture", true);
             } else {
                 shader.setBool("useTexture", false);
             }
-            model.Draw(shader);
+            shader.setMat4("model", model.second);
+
+            model.first.Draw(shader);
         }
 
         // 后续可添加软阴影渲染的逻辑
@@ -36,13 +38,13 @@ public:
         // glClear(GL_DEPTH_BUFFER_BIT);
         // ...
     }
-    void addModel(Model model)
+    void addModel(Model &model, glm::mat4 modelMatrix)
     {
-        models.emplace_back(model);
+        models.emplace_back(model, modelMatrix);
     }
 
 private:
-    std::vector<Model> models;
+    std::vector<std::pair<Model, glm::mat4>> models;
     // 后续可添加用于软阴影渲染的相关成员变量，如帧缓冲对象、深度纹理等
     // unsigned int depthMapFBO;
 };
