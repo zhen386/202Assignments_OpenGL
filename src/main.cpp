@@ -93,7 +93,7 @@ int main()
 
     Shader sceneShader(vertexShader, fragmentShader);
     Shader lightCubeShader(lightCubeVertexShader, lightCubeFragmentShader);
-    Shader shadowShader(shadowMapVertexShader, shadowMapFragmentShader);
+    // Shader shadowShader(shadowMapVertexShader, shadowMapFragmentShader);
     // Shader floorShader("../src/shaders/floor.vert", "../src/shaders/floor.frag");
     Model marry("../assets/mary/Marry.obj");
     Model floor("../assets/floor/floor.obj", false);
@@ -155,7 +155,7 @@ int main()
         // model = glm::scale(model, modelScale);
 
         sceneShader.setMat4("model", model);
-        shadowShader.setMat4("model", model);
+        // shadowShader.setMat4("model", model);
         sceneShader.setVec3("viewPos", camera.Position);
 
         // scene.render(sceneShader);
